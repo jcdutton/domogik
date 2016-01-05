@@ -67,7 +67,7 @@ def main():
         sys.exit(0)
     if not options.run_in_foreground:
         daemon = True
-        daemonize.createDaemon()
+        daemonize.createDaemon('xpl_hub')
 
         #from twisted.internet.protocol import DatagramProtocol
         from twisted.internet import reactor

@@ -223,6 +223,7 @@ class SysManager(XplPlugin):
                     self._write_fifo("WARN", "Manager started with -d, but a database manager is already running\n")
                     self._dec_startup_lock()
                 else:
+                    self.log.info("Manager starting dbmgr")
                     thr_dbmgr = Thread(None,
                                        self._start_plugin,
                                        "start_plugin_dbmgr",
@@ -231,6 +232,7 @@ class SysManager(XplPlugin):
                     self.register_thread(thr_dbmgr)
                     thr_dbmgr.start()
     
+            self.log.info("Manager started dbmgr")
             #Start rest
             if self.options.start_rest:
                 self._inc_startup_lock()
@@ -239,6 +241,7 @@ class SysManager(XplPlugin):
                     self._write_fifo("WARN", "Manager started with -r, but a REST manager is already running\n")
                     self._dec_startup_lock()
                 else:
+                    self.log.info("Manager starting Rest")
                     thr_rest = Thread(None,
                                        self._start_plugin,
                                        "start_plugin_rest",
@@ -247,6 +250,7 @@ class SysManager(XplPlugin):
                     self.register_thread(thr_rest)
                     thr_rest.start()
     
+            self.log.info("Manager started Rest")
             # Get components:
             self._list_plugins()
             if self.options.check_external == True:
@@ -563,7 +567,7 @@ class SysManager(XplPlugin):
             @param startup : set it to True if you call _start_plugin during manager start
         """
         error = ""
-        self.log.debug("Ask to start %s on %s" % (plg, self.get_sanitized_hostname()))
+        self.log.info("Ask to start %s on %s" % (plg, self.get_sanitized_hostname()))
         if startup:
             self._write_fifo("INFO", "Start %s on %s\n" % (plg, self.get_sanitized_hostname()))
         mess = XplMessage()
@@ -575,20 +579,25 @@ class SysManager(XplPlugin):
         if ping == True:
             if self._check_component_is_running(plg, only_one_ping = True):
                 error = "Component %s is already running on %s" % (plg, self.get_sanitized_hostname())
-                self.log.warning(error)
+                self.log.info(error)
                 if startup:
                     self._write_fifo("ERROR", "Component %s is already running\n" % plg)
                 mess.add_data({'error' : error})
                 self.myxpl.send(mess)
                 return
+        self.log.info("Component %s about to exec" % plg)
         pid = self._exec_plugin(plg)
+        self.log.info("Component %s exec with pid %s" % (plg,
+                        pid))
         if pid:
             # let's check if component successfully started
+            self.log.info("Sleeping...")
             time.sleep(READ_NETWORK_TIMEOUT + 0.5) # time a plugin took to die.
+            self.log.info("Woken")
             # component started
             if self._check_component_is_running(plg):
                 if plg == "rest" : self._rest_started = True
-                self.log.debug("Component %s started with pid %s" % (plg,
+                self.log.info("Component %s started with pid %s" % (plg,
                         pid))
                 if startup:
                     self._write_fifo("OK", "Component %s started with pid %s\n" % (plg,
@@ -597,7 +606,7 @@ class SysManager(XplPlugin):
             # component failed to start
             else:
                 error = "Component %s failed to start. Please look in this component log files" % plg
-                self.log.error(error)
+                self.log.info(error)
                 if startup:
                     self._write_fifo("ERROR", error + "\n")
                 self._delete_pid_file(plg)
@@ -744,11 +753,16 @@ class SysManager(XplPlugin):
             plg_path = "domogik_packages.xpl.bin." + name
         __import__(plg_path)
         plugin = sys.modules[plg_path]
-        self.log.debug("Component path : %s" % plugin.__file__)
+        self.log.info("Component path : %s" % plugin.__file__)
         subp = Popen("export PYTHONPATH=%s && /usr/bin/python %s" % (self._package_path, plugin.__file__), \
                      shell=True)
+                     # stdout=PIPE, stdin=PIPE, shell=True)
+        self.log.info("Popen done")
         pid = subp.pid
+        self.log.info("subp.pid %s" % pid)
         subp.communicate()
+        #stdout, stderr = subp.communicate()
+        self.log.info("subp.communicate() done")
         return pid
 
     def _delete_pid_file(self, plg):

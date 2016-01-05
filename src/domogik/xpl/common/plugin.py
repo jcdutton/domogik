@@ -44,6 +44,7 @@ from domogik.xpl.common.xplconnector import XplMessage, Manager, Listener
 from domogik.xpl.common.baseplugin import BasePlugin
 from domogik.common.configloader import Loader, CONFIG_FILE
 from domogik.common.processinfo import ProcessInfo
+from domogik.common import logger
 
 # time between each read of cpu/memory usage for process
 TIME_BETWEEN_EACH_PROCESS_STATUS = 60
@@ -95,8 +96,14 @@ class XplPlugin(BasePlugin):
         on the command line. If set to True (default), will check if -f was added.
         @param nohub : if set the hub discovery will be disabled
         '''
+
+        log_tmp_xpl_2a = logger.Logger('xplplugin-jcd-test')
+        log_tmp_xpl_2b = log_tmp_xpl_2a.get_logger('xplplugin-jcd-test')
+        log_tmp_xpl_2b.info("xpl_init name: '%s' :1a" % name)
         BasePlugin.__init__(self, name, stop_cb, parser, daemonize)
+        log_tmp_xpl_2b.info("xpl_init name: '%s' :1b" % name)
         Watcher(self)
+        log_tmp_xpl_2b.info("xpl_init name: '%s' :1c" % name)
         self.log.info("----------------------------------")
         self.log.info("Starting plugin '%s' (new manager instance)" % name)
         self._is_manager = is_manager

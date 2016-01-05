@@ -49,6 +49,7 @@ class VelbusManager(XplPlugin):
         """
         XplPlugin.__init__(self, name='velbus')
         self._config = Query(self.myxpl, self.log)
+        self.log.debug("velbus bin ver 6")
         # get the config values
         device_type = self._config.query('velbus', 'connection-type')
         if device_type == None:
@@ -85,6 +86,12 @@ class VelbusManager(XplPlugin):
                  {'xpltype': 'xpl-cmnd', 'schema': 'lighting.basic'})
         Listener(self.process_shutter_basic, self.myxpl,
                  {'xpltype': 'xpl-cmnd', 'schema': 'shutter.basic'})
+        #Listener(self.process_temperature_basic, self.myxpl,
+        #         {'xpltype': 'xpl-cmnd', 'schema': 'temp.basic'})
+        Listener(self.process_temperature_basic, self.myxpl, 
+                                       {'schema': 'sensor.basic',
+                                        'xpltype': 'xpl-stat',
+                                        'type': 'temp'})
         # Create listeners
         try:
             self.manager.open(device, device_type)
@@ -106,6 +113,16 @@ class VelbusManager(XplPlugin):
         
         self.enable_hbeat()
 
+    def force_leave(self):
+        """ force_leave
+        """
+        self.log.info("velbus force_leave bin called")
+
+    def close(self):
+        """ Close the open device
+        """
+        self._log.info("Close VELBUS lib")
+
     def send_xpl(self, schema, data):
         """ Send xPL message on network
         """
@@ -124,31 +141,73 @@ class VelbusManager(XplPlugin):
         self.myxpl.send(message)
 
     def process_lighting_basic(self, message):
-        """ Process xpl chema lightning.basic
+        """ Process xpl schema lightning.basic
+            Used to set the temperature.
         """
+        dev = None
+        level = "0"
         #self.send_xpl("lighting.device", message.data)
-        add = message.data['device'].split('-')
-        chan = int(add[1])
-        address = add[0]
-        if message.data["level"] == 'None':
-            message.data["level"] = 0
-        self.manager.send_level( address, chan, message.data["level"])
+        self.log.debug("process_lighting_basic called")
+        if 'device' in message.data:
+            dev = message.data['device'].upper()
+        if 'level' in message.data:
+            level = message.data['level']
+        try:
+            self.log.debug("set level")
+            self.manager._log.debug("set level lib down")
+            self.manager.send_level( dev, level )
+        except:
+            self.log.debug("set level failed")
 
     def process_shutter_basic(self, message):
-        """ Process xpl chema shutter.basic
+        """ Process xpl schema shutter.basic
         """
         self.send_xpl("shutter.device", message.data)
-        add = message.data['device'].split('-')
-        chan = int(add[1])
-        address = add[0]
-        if message.data["command"] == "up":
+        self.log.debug("process_shutter_basic called")
+        cmd = None
+        dev = None
+        user = '00'
+        level = 0
+        rate = 0
+        if 'command' in message.data:
+            cmd = message.data['command']
+        self.log.debug("process_shutter_basic got here 1")
+        if 'device' in message.data:
+            dev = message.data['device'].upper()
+        self.log.debug("process_shutter_basic got here 2")
+        self.log.debug("%s received : device = %s" % (cmd.upper(), dev))
+        self.log.debug("process_shutter_basic got here 3")
+        if cmd == "up":
             self.log.debug("set shutter up")
-            self.manager.send_shutterup( address, chan )
-        elif message.data["command"] == "down":
+            #self.manager.send_shutterup( address, chan )
+            self.manager.send_temp( dev )
+        elif cmd == "down":
             self.log.debug("set shutter down")
-            self.manager.send_shutterdown( address, chan )
+            try:
+                self.log.debug("set shutter down")
+                self.manager._log.debug("set shutter lib down")
+        	self.manager.send_temp( dev )
+                #self.manager.send_temp( device, 0 )
+            except:
+                self.log.debug("set shutter down failed")
         else:
             self.log.debug("Unknown command in shutter.basic message")
-       
+        self.log.debug("process_shutter_basic got here 20")
+
+    def process_temperature_basic(self, message):
+        """ Process xpl schema temp.basic
+        """
+        dev = None
+        #self.send_xpl("temp.device", message.data)
+        self.log.debug("process_temperature_basic called")
+        if 'device' in message.data:
+            dev = message.data['device'].upper()
+        try:
+            self.log.debug("get temp")
+            self.manager._log.debug("get temp lib down")
+            self.manager.send_temp( dev )
+        except:
+            self.log.debug("get temp failed")
+
 if __name__ == "__main__":
     VelbusManager()

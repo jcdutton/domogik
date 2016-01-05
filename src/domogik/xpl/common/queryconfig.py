@@ -128,7 +128,7 @@ class Query():
 
         msg = "QC : ask > h=%s, t=%s, k=%s" % \
             (self.__myxpl.p.get_sanitized_hostname(), technology, key)
-        print(msg)
+        #print(msg)
         self.log.debug(msg)
         l = Listener(self._query_cb, self.__myxpl, {'schema': 'domogik.config',
                                                     'xpltype': 'xpl-stat',

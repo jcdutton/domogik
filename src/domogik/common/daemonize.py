@@ -25,6 +25,7 @@ __version__ = "0.2"
 # Standard Python plugins.
 import os               # Miscellaneous OS interfaces.
 import sys              # System-specific parameters and functions.
+from domogik.common import logger
 
 # Default daemon parameters.
 # File mode creation mask of the daemon.
@@ -42,10 +43,13 @@ if (hasattr(os, "devnull")):
 else:
    REDIRECT_TO = "/dev/null"
 
-def createDaemon():
+def createDaemon(name):
    """Detach a process from the controlling terminal and run it in the
    background as a daemon.
    """
+   log_createDaemon2a = logger.Logger('createDaemon-jcd-test')
+   log_createDaemon2b = log_createDaemon2a.get_logger('createDaemon-jcd-test')
+   log_createDaemon2b.info("createDaemon: '%s' 1a" % name)
 
    try:
       # Fork a child process so the parent can exit.  This returns control to
@@ -157,24 +161,41 @@ def createDaemon():
    if (maxfd == resource.RLIM_INFINITY):
       maxfd = MAXFD
   
+   log_createDaemon2b.info("createDaemon: '%s' 3a" % name)
    # Iterate through and close all file descriptors.
-   for fd in range(0, maxfd):
-      try:
-         os.close(fd)
-      except OSError:	# ERROR, fd wasn't open to begin with (ignored)
-         pass
+   #for fd in range(0, maxfd):
+   #   try:
+   #      os.close(fd)
+   #   except OSError:	# ERROR, fd wasn't open to begin with (ignored)
+   #      pass
 
+   log_createDaemon2b.info("createDaemon: '%s' 3b" % name)
    # Redirect the standard I/O file descriptors to the specified file.  Since
    # the daemon has no controlling terminal, most daemons redirect stdin,
    # stdout, and stderr to /dev/null.  This is done to prevent side-effects
    # from reads and writes to the standard I/O file descriptors.
+   sys.stdout.flush()
+   sys.stderr.flush()
+   # This call to open is guaranteed to return the lowest file descriptor,
+   # which will be 0 (stdin), since it was closed above.
+   si = file(REDIRECT_TO, 'r')
+   so = file(REDIRECT_TO, 'a+')
+   se = file(REDIRECT_TO, 'a+', 0)
+   os.dup2(si.fileno(), sys.stdin.fileno())
+   os.dup2(so.fileno(), sys.stdout.fileno())
+   os.dup2(se.fileno(), sys.stderr.fileno())
+
+
+
+   #os.open(REDIRECT_TO, os.O_RDWR)	# standard input (0)
+
 
    # This call to open is guaranteed to return the lowest file descriptor,
    # which will be 0 (stdin), since it was closed above.
-   os.open(REDIRECT_TO, os.O_RDWR)	# standard input (0)
+   #os.open(REDIRECT_TO, os.O_RDWR)	# standard input (0)
 
    # Duplicate standard input to standard output and standard error.
-   os.dup2(0, 1)			# standard output (1)
-   os.dup2(0, 2)			# standard error (2)
+   #os.dup2(0, 1)			# standard output (1)
+   #os.dup2(0, 2)			# standard error (2)
 
    return(0)

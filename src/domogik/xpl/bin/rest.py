@@ -44,17 +44,28 @@ class RestHandler(BaseHTTPRequestHandler):
 @license: GPL(v3)
 @organization: Domogik
 """
+
 from domogik.xpl.common.xplconnector import XplTimer
 from domogik.xpl.common.xplmessage import XplMessage
 from domogik.xpl.common.xplconnector import Listener
 from domogik.xpl.common.plugin import XplPlugin
 from domogik.common import logger
+log_tmp1a = logger.Logger('rest1-jcd-test')
+log_tmp1b = log_tmp1a.get_logger('rest1-jcd-test')
+log_tmp1b.info("Rest1 Server init 1a")
+
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from domogik.xpl.lib.rest.jsondata import JSonHelper
 from domogik.xpl.lib.rest.event import DmgEvents
 from domogik.xpl.lib.rest.eventrequest import RequestEvents
+print("Rest1 Start 1")
+log_tmp1b.info("Rest1 Start 1")
 from domogik.xpl.lib.rest.stat import StatsManager
+print("Rest1 Start 2")
+log_tmp1b.info("Rest1 Start 2")
 from domogik.xpl.lib.rest.request import ProcessRequest
+print("Rest1 Start 3")
+log_tmp1b.info("Rest1 Start 3")
 from domogik.common.configloader import Loader
 from domogik.common.packagemanager import PackageManager
 from domogik.common.database import DbHelper, DbHelperException
@@ -62,19 +73,24 @@ from xml.dom import minidom
 import time
 import urllib
 import locale
+log_tmp1b.info("Rest1 Start 6")
 from Queue import Queue, Empty, Full
 from domogik.xpl.common.queryconfig import Query
 import traceback
 import datetime
 import socket
 from OpenSSL import SSL
+log_tmp1b.info("Rest1 Start 8")
 import SocketServer
 import os
 import errno
 import pyinotify
 import calendar
 import tempfile
+log_tmp1b.info("Rest1 Start 9")
 from threading import Semaphore
+
+log_tmp1b.info("Rest1 Start 10")
 
 REST_API_VERSION = "0.6"
 #REST_DESCRIPTION = "REST plugin is part of Domogik project. See http://trac.domogik.org/domogik/wiki/modules/REST.en for REST API documentation"
@@ -115,6 +131,7 @@ DATABASE_CONNECTION_NUM_TRY = 50  # number of try
 DATABASE_CONNECTION_WAIT = 30     # time in second between each try
 
 
+log_tmp1b.info("Rest1 Start 11")
 
 ################################################################################
 class EventHandler(pyinotify.ProcessEvent):
@@ -148,8 +165,16 @@ class Rest(XplPlugin):
             @param server_port :  port of HTTP server
         """
 
+        log_tmp1b.info("Rest2 Server init 1")
+        print("Rest2 Server init 1")
+        log_tmp2a = logger.Logger('rest2-jcd-test')
+        log_tmp2b = log_tmp2a.get_logger('rest2-jcd-test')
+        log_tmp2b.info("Rest2 Server init 1a")
+
         XplPlugin.__init__(self, name = 'rest')
+        log_tmp2b.info("Rest2 Server init 1b")
         # logging initialization
+        print("Rest2 Server init 2")
         self.log.info("Rest Server initialisation...")
         self.log.debug("locale : %s %s" % locale.getdefaultlocale())
 
@@ -1151,7 +1176,10 @@ class RestHandler(BaseHTTPRequestHandler):
                 raise err
 
 
+log_tmp1b.info("Rest1 Start 12 %s" % __name__)
 if __name__ == '__main__':
     # Create REST server with default values (overriden by ~/.domogik/domogik.cfg)
     REST = Rest("127.0.0.1", "8080")
+
+log_tmp1b.info("Rest1 Start 13")
 

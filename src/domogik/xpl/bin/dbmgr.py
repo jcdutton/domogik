@@ -113,7 +113,7 @@ class DBConnector(XplPlugin):
         hostname = message.data['hostname']
         key = message.data['key']
         msg = "Request  h=%s, t=%s, k=%s" % (hostname, techno, key)
-        print(msg)
+        #print(msg)
         self.log.debug(msg)
         if "value" in message.data:
             new_value = message.data['value']
@@ -125,7 +125,7 @@ class DBConnector(XplPlugin):
             element = None
 
         msg = "Request  h=%s, t=%s, k=%s (2)" % (hostname, techno, key)
-        print(msg)
+        #print(msg)
         self.log.debug(msg)
         # Set configuration
         if new_value:
@@ -137,27 +137,27 @@ class DBConnector(XplPlugin):
         # Send configuration
         else:
             msg = "Request  h=%s, t=%s, k=%s (send)" % (hostname, techno, key)
-            print(msg)
+            #print(msg)
             self.log.debug(msg)
             if element:
                 msg = "Request  h=%s, t=%s, k=%s (send if element)" % (hostname, techno, key)
-                print(msg)
+                #print(msg)
                 self.log.debug(msg)
                 self._send_config(techno, hostname, key, self._fetch_elmt_config(techno, element, key), element)
             else:
                 msg = "Request  h=%s, t=%s, k=%s (send else)" % (hostname, techno, key)
-                print(msg)
+                #print(msg)
                 self.log.debug(msg)
                 if not key:
                     msg = "Request  h=%s, t=%s, k=%s (send if not key)" % (hostname, techno, key)
-                    print(msg)
+                    #print(msg)
                     self.log.debug(msg)
                     keys = self._fetch_techno_config(techno, hostname, key).keys()
                     values = self._fetch_techno_config(techno, hostname, key).values()
                     self._send_config(techno, hostname, keys, values)
                 else:
                     msg = "Request  h=%s, t=%s, k=%s (send else of if not key)" % (hostname, techno, key)
-                    print(msg)
+                    #print(msg)
                     self.log.debug(msg)
                     self._send_config(techno, hostname, key, self._fetch_techno_config(techno, hostname, key))
 
@@ -171,7 +171,7 @@ class DBConnector(XplPlugin):
         @param value : the value or list of values corresponding to the key(s)
         '''
         msg = "Response h=%s, t=%s, k=%s, v=%s" % (hostname, technology, key, value)
-        print(msg)
+        #print(msg)
         self.log.debug(msg)
         mess = XplMessage()
         mess.set_type('xpl-stat')

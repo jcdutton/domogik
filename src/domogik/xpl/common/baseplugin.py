@@ -60,7 +60,11 @@ class BasePlugin():
 
         # First, check if the user is allowed to launch the plugin. The user must be the same as the one defined
         # in the file /etc/default/domogik : DOMOGIK_USER
+        log_baseplug2a = logger.Logger('baseplug-jcd-test')
+        log_baseplug2b = log_baseplug2a.get_logger('baseplug-jcd-test')
+        log_baseplug2b.info("baseplugin_init name: '%s' :1a" % name)
         Default = DefaultLoader()
+        log_baseplug2b.info("baseplugin_init name: '%s' :1b" % name)
         dmg_user = Default.get("DOMOGIK_USER")
         logname = pwd.getpwuid(os.getuid())[0]
         if dmg_user != logname:
@@ -104,14 +108,16 @@ class BasePlugin():
             print global_release
             sys.exit(0)
         elif not self.options.run_in_foreground and daemonize:
-            createDaemon()
+            log_baseplug2b.info("baseplugin_init name: '%s' :2a" % name)
+            createDaemon(name)
+            log_baseplug2b.info("baseplugin_init name: '%s' :2b" % name)
             l = logger.Logger(name)
-            self.log = l.get_logger()
+            self.log = l.get_logger(name)
             self.log.info("Daemonize plugin %s" % name)
             self.is_daemon = True
         else:
             l = logger.Logger(name)
-            self.log = l.get_logger()
+            self.log = l.get_logger(name)
             self.is_daemon = False
 
     def should_stop(self):
